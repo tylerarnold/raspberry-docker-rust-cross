@@ -18,6 +18,9 @@ LABEL maintainer="Tyler Arnold <tyler@mac.com>"
 # /bin/sh points to Dash by default, need bash for yocto builds
 SHELL ["/bin/bash", "-c"]
 
+# utils
+RUN apt-get update && apt-get -y install curl
+
 # install Rustup 
 RUN curl https://sh.rustup.rs -sSf | sh
 
@@ -25,3 +28,14 @@ RUN curl https://sh.rustup.rs -sSf | sh
 RUN rustup target add armv7-unknown-linux-gnueabihf
 
 RUN sudo apt-get install gcc-4.7-multilib-arm-linux-gnueabihf
+
+
+VOLUME ["/cargo-dir"]
+
+
+#############################################
+# FOR DEV: Dockerfile stage for bash env
+#############################################
+FROM build-env as bash-env
+
+ENTRYPOINT ["/bin/bash"]

@@ -1,0 +1,55 @@
+version: "3.6"
+################################################################################
+# OVERVIEW:
+# Docker-Compose YAML used to define the different services used to download,
+
+# "Host" refers to the computer that is running the docker daemon (laptop, bert, etc)
+# "Container" refers to what docker is running (kinda like a VM)
+# 
+# Use Docker Compose Extension Fields (sections that start with "x-") to keep
+#  things DRY (don't repeat yoself)
+#  https://docs.docker.com/compose/compose-file/#extension-fields
+################################################################################
+
+################################################################################
+# Volumes / Mount Host Paths Defintion                                         #
+################################################################################
+
+
+volumes:
+  cargo-dir:
+
+x-cargo-work-volumes:
+  &cargo-work-volumes
+  - type: bind
+    source: ${CARGO_DIR:?Environment variable CARGO_DIR is required.}
+    target: /cargo-dir
+    consistency: delegated
+
+
+################################################################################
+# Environment Variables Defintion                                              #
+################################################################################
+
+x-build-vars:
+  &build-vars
+    - CARGO_DIR=/cargo-dir
+
+################################################################################
+# Services Definition                                                          #
+################################################################################
+
+services:
+  bash-env:
+    build:
+      args:
+       - LOCAL_USER_ID=${LOCAL_USER_ID:-1000}
+      context: .
+      target: bash-env
+    image: rust-cross/bash-env
+    stdin_open: true
+    tty: true
+    volumes:
+      *cargo-work-volumes
+    environment:
+      *build-vars
